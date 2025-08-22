@@ -1,34 +1,30 @@
 <?php
-/*
-Plugin Name: Frequently Bought Together
-Description: WooCommerce FBT plugin skeleton
-Version: 0.1
-Author: Shruti Sharma
-*/
+/**
+ * Plugin Name: SKP FBT Plugin
+ * Description: Frequently Bought Together plugin for WooCommerce
+ * Version: 1.0.0
+ * Author: Shruti Sharma
+ */
 
-if (!defined('ABSPATH')) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) exit;
 
-// Include config
-require_once plugin_dir_path(__FILE__) . 'config.php';
+// Autoload includes
+require_once __DIR__ . '/includes/db-schema.php';
+require_once __DIR__ . '/includes/class-skp-fbt-cart-widget.php';
+require_once __DIR__ . '/includes/class-skp-fbt-settings.php';
+require_once __DIR__ . '/includes/class-skp-fbt-api.php';
 
-// Include admin settings page
-require_once plugin_dir_path(__FILE__) . 'admin/settings.php';
+// Plugin activation hook -> create DB tables
+register_activation_hook( __FILE__, 'skp_fbt_install' );
+function skp_fbt_install() {
 
-// Include core functions
-require_once plugin_dir_path(__FILE__) . 'includes/functions.php';
-require_once plugin_dir_path(__FILE__) . 'includes/class-skp-fbt-settings.php';
+    //use file exists();
+    require_once __DIR__ . '/includes/db-schema.php';
+    skp_fbt_create_tables();
+}
 
-// Hook to add settings page
-add_action('admin_menu', 'fbt_add_admin_menu');
-
-function fbt_add_admin_menu() {
-    add_menu_page(
-        'FBT Settings',      // Page title
-        'FBT Settings',      // Menu title
-        'manage_options',    // Capability
-        'fbt-settings',      // Menu slug
-        'fbt_settings_page', // Function
-        'dashicons-cart',    // Icon
-        56                   // Position
-    );
+// Plugin deactivation hook -> cleanup if needed
+register_deactivation_hook( __FILE__, 'skp_fbt_deactivate' );
+function skp_fbt_deactivate() {
+    // No hard delete, maybe disable cron jobs if any
 }

@@ -1,50 +1,50 @@
 <?php
-function fbt_settings_page() {
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+function skp_fbt_register_settings() {
+    register_setting( 'skp_fbt_options', 'skp_fbt_enabled' );
+    register_setting( 'skp_fbt_options', 'skp_fbt_limit' );
+    register_setting( 'skp_fbt_options', 'skp_fbt_min_score' );
+    register_setting( 'skp_fbt_options', 'skp_fbt_abtest' );
+}
+add_action( 'admin_init', 'skp_fbt_register_settings' );
+
+function skp_fbt_settings_page() {
     ?>
     <div class="wrap">
-        <h1>FBT Plugin Settings</h1>
+        <h1>SKP FBT Settings</h1>
         <form method="post" action="options.php">
-            <?php
-            settings_fields('fbt_settings_group');
-            do_settings_sections('fbt-settings');
-            submit_button();
-            ?>
+            <?php settings_fields( 'skp_fbt_options' ); ?>
+            <?php do_settings_sections( 'skp_fbt_options' ); ?>
+
+            <table class="form
+                <tr valign="top">
+                    <th scope="row">Enable Widget</th>
+                    <td><input type="checkbox" name="skp_fbt_enabled"
+                        value="1" <?php checked( get_option('skp_fbt_enabled'), 1 ); ?> /></td>
+                </tr>
+
+                <tr valign="top">
+                    <th scope="row">Number of Recommendations</th>
+                    <td><input type="number" name="skp_fbt_limit"
+                        value="<?php echo esc_attr( get_option('skp_fbt_limit', 3) ); ?>" min="1" max="10" /></td>
+                </tr>
+
+                <tr valign="top">
+                    <th scope="row">Minimum Score Threshold</th>
+                    <td><input type="number" step="0.1" name="skp_fbt_min_score"
+                        value="<?php echo esc_attr( get_option('skp_fbt_min_score', 0.5) ); ?>" min="0" max="1" /></td>
+                </tr>
+
+                <tr valign="top">
+                    <th scope="row">Enable A/B Test</th>
+                    <td><input type="checkbox" name="skp_fbt_abtest"
+                        value="1" <?php checked( get_option('skp_fbt_abtest'), 1 ); ?> /></td>
+                </tr>
+            </table>
+
+            <?php submit_button(); ?>
         </form>
     </div>
     <?php
 }
-
-function fbt_register_settings() {
-    // Register settings
-    register_setting('fbt_settings_group', 'fbt_api_url');
-    register_setting('fbt_settings_group', 'fbt_enable_widget');
-
-    add_settings_section('fbt_main_section', 'Main Settings', null, 'fbt-settings');
-    
-    // API URL field
-    add_settings_field('fbt_api_url', 'Batch API URL', 'fbt_api_url_field', 'fbt-settings', 'fbt_main_section');
-    // Enable/disable widget
-    add_settings_field('fbt_enable_widget', 'Enable Widget', 'fbt_enable_widget_field', 'fbt-settings', 'fbt_main_section');
-}
-
-add_action('admin_init', 'fbt_register_settings');
-
-function fbt_api_url_field() {
-    $url = get_option('fbt_api_url', FBT_PLUGIN_API_URL);
-    echo "<input type='text' name='fbt_api_url' value='$url' size='50'/>";
-}
-
-function fbt_enable_widget_field() {
-    $enabled = get_option('fbt_enable_widget', 1);
-    echo "<input type='checkbox' name='fbt_enable_widget' value='1'" . checked(1, $enabled, false) . "/>";
-}
-
-add_action('admin_notices', function () {
-    $batch_url = get_option('skp-fbt_batch_url');
-    $enabled   = get_option('skp-fbt_checkbox');
-
-    echo '<div class="notice notice-info"><p>';
-    echo 'Saved Batch URL: ' . esc_html($batch_url) . '<br>';
-    echo 'Checkbox Enabled: ' . esc_html($enabled);
-    echo '</p></div>';
-});
