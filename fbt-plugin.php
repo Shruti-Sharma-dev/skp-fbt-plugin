@@ -6,25 +6,13 @@
  * Author: Shruti Sharma
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (!defined('ABSPATH')) exit;
 
-// Autoload includes
-require_once __DIR__ . '/includes/db-schema.php';
-require_once __DIR__ . '/includes/class-skp-fbt-cart-widget.php';
-require_once __DIR__ . '/includes/class-skp-fbt-settings.php';
-require_once __DIR__ . '/includes/class-skp-fbt-api.php';
+// Include product & cart widget functions
+require_once plugin_dir_path(__FILE__) . 'templates/fbt-widgets.php';
 
-// Plugin activation hook -> create DB tables
-register_activation_hook( __FILE__, 'skp_fbt_install' );
-function skp_fbt_install() {
-
-    //use file exists();
-    require_once __DIR__ . '/includes/db-schema.php';
-    skp_fbt_create_tables();
+// Enqueue widget CSS
+function skp_fbt_enqueue_assets() {
+    wp_enqueue_style('skp-fbt-css', plugin_dir_url(__FILE__) . 'assets/cart-widget.css');
 }
-
-// Plugin deactivation hook -> cleanup if needed
-register_deactivation_hook( __FILE__, 'skp_fbt_deactivate' );
-function skp_fbt_deactivate() {
-    // No hard delete, maybe disable cron jobs if any
-}
+add_action('wp_enqueue_scripts', 'skp_fbt_enqueue_assets');

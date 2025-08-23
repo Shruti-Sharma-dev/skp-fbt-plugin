@@ -1,0 +1,30 @@
+.fbt-widget {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+    background: #f9f9f9;
+}
+.fbt-products {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+}
+.fbt-product {
+    text-align: center;
+    width: 150px;
+    border: 1px solid #eee;
+    padding: 10px;
+    background: #fff;
+}
+.fbt-product img {
+    max-width: 100%;
+    height: auto;
+}
+.fbt-product button {
+    margin-top: 5px;
+    background: #0071a1;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
