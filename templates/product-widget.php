@@ -40,4 +40,4 @@ function skp_fbt_product_ui_widget() {
 }
 
 // Hook it to product page for now
-add_action('woocommerce_after_single_product_summary', 'skp_fbt_product_ui_widget', 15);
+add_action('woocommerce_after_add_to_cart_button', 'skp_fbt_product_ui_widget');

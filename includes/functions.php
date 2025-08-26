@@ -1,20 +1,19 @@
 <?php
 // Placeholder for fetching recommendations
 function fbt_get_recommendations($product_id) {
-    $api_url = get_option('fbt_api_url', FBT_PLUGIN_API_URL);
-    // Placeholder: fetch recommendations from batch API
-    return [];
+    return [
+        ['id' => 201, 'name' => 'Sample Product A'],
+        ['id' => 202, 'name' => 'Sample Product B'],
+    ];
 }
 
-// Placeholder for rendering widget on product page
-function fbt_render_product_widget($product_id) {
-    $recs = fbt_get_recommendations($product_id);
-    echo '<div class="fbt-widget">';
-    foreach ($recs as $rec) {
-        echo '<label><input type="checkbox" data-product-id="' . $rec['id'] . '">' . $rec['name'] . '</label>';
-    }
-    echo '</div>';
-}
+// Rendering widget on product page
+function fbt_render_product_widget() {
+    global $product;
+    $product_id = $product ? $product->get_id() : 0;
 
-// Hook placeholder to product page (WooCommerce)
+    echo "<div style='border:2px solid red; padding:10px; margin:10px 0;'>";
+    echo "<strong>FBT Debug:</strong> Product ID = " . esc_html($product_id) . "<br>";
+    echo "</div>";
+}
 add_action('woocommerce_after_add_to_cart_button', 'fbt_render_product_widget');
