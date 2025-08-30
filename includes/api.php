@@ -27,15 +27,36 @@ class SKP_FBT_API {
         // Require auth in production (for now open for testing)
         return current_user_can('manage_options') || true;
     }
-]);
+    ]);
 
     }
 
-    public function get_recommendations( $request ) {
-        $product_id = intval( $request['product_id'] );
-        require_once __DIR__ . '/recs-query.php';
-        return skp_fbt_get_recommendations( $product_id );
+   public function get_recommendations( $request ) {
+        global $wpdb;
+    $table = $wpdb->prefix . 'skp_fbt_recommendations';
+
+    $product_id = intval( $request['product_id'] );
+
+    $row = $wpdb->get_row(
+        $wpdb->prepare("SELECT recommendations FROM $table WHERE product_id = %d", $product_id),
+        ARRAY_A
+    );
+
+    if ( ! $row ) {
+        return [ 'success' => false, 'message' => 'No recommendations found.' ];
     }
+
+    $recs = json_decode( $row['recommendations'], true );
+    error_log("SKP DEBUG product_id: " . $product_id);
+    error_log(print_r($row, true));
+
+    return [
+        'success'         => true,
+        'product_id'      => $product_id,
+        'recommendations' => $recs
+    ];
+    }
+
 
     public function track_event( $request ) {
         $event = sanitize_text_field( $request['event'] );
@@ -45,28 +66,37 @@ class SKP_FBT_API {
     }
 
 
-    public function save_recommendations( $request ) {
+   public function save_recommendations( $request ) {
     global $wpdb;
     $table = $wpdb->prefix . 'skp_fbt_recommendations';
 
     $product_id = intval( $request['product_id'] );
     $recs       = $request['recommendations']; // array of product IDs
+    $score      = isset($request['score']) ? floatval($request['score']) : 0;
 
     if ( ! $product_id || empty($recs) ) {
         return new WP_Error( 'invalid_data', 'Product ID and recommendations required', [ 'status' => 400 ] );
     }
 
+     $recs_json = wp_json_encode( $recs );
+    // Logging for debug
+    error_log('save_recommendations called for product_id: ' . $product_id);
+    error_log('Recommendations: ' . print_r($recs, true));
+    error_log('Score: ' . $score);
+
     // Save or update in DB
     $wpdb->replace(
         $table,
         [
-            'product_id' => $product_id,
-            'recommendations' => maybe_serialize( $recs )
+            'product_id'     => $product_id,
+            'recommendations'=> $recs_json, // table column
+            'score'          => $score,
+            'created_at'     => current_time('mysql')
         ],
-        [ '%d', '%s' ]
+        [ '%d', '%s', '%f', '%s' ]
     );
 
-    return [ 'success' => true, 'product_id' => $product_id, 'recommendations' => $recs ];
+    return [ 'success' => true, 'product_id' => $product_id, 'recommendations' => $recs, 'score' => $score ];
 }
 
 }

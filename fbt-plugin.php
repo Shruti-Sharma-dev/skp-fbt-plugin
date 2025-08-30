@@ -10,43 +10,31 @@ if (!defined('ABSPATH')) exit;
 
 // Include core functions
 // require_once plugin_dir_path(__FILE__) . 'includes/functions.php';
-include plugin_dir_path(__FILE__) . 'templates/cart-widget.php';
+// include plugin_dir_path(__FILE__) . 'templates/cart-widget.php';
 
 include plugin_dir_path(__FILE__) . 'templates/product-widget.php';
 
 include plugin_dir_path(__FILE__) . 'includes/api.php';
-include plugin_dir_path(__FILE__) . 'includes/functions.php';
+// include plugin_dir_path(__FILE__) . 'includes/functions.php';
 include plugin_dir_path(__FILE__) . 'includes/db-schema.php';
 include plugin_dir_path(__FILE__) . 'includes/class-skp-fbt-settings.php';
+// include plugin_dir_path(__FILE__) . 'includes/recs-query.php';
 
 
-// // Cart widget
-// add_action('woocommerce_after_cart_table', function() {
-//     include plugin_dir_path(__FILE__) . 'templates/cart-widget.php';
-// });
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_script(
+        'fbt-widget',
+        plugin_dir_url(__FILE__) . 'assets/js/fbt-widget.js',
+        [], // no jQuery dependency
+        false,
+        true // load in footer
+    );
+});
 
-// // Enqueue CSS and JS
-// add_action('wp_enqueue_scripts', function() {
-//     wp_enqueue_style(
-//         'skp-fbt-style',
-//         plugin_dir_url(__FILE__) . 'assets/cart-widget.css',
-//         array(),
-//         '1.0.0'
-//     );
+register_activation_hook( __FILE__, 'skp_fbt_activate_plugin' );
 
-//     wp_enqueue_script(
-//         'skp-fbt-js',
-//         plugin_dir_url(__FILE__) . 'assets/fbt-widget.js',
-//         array('jquery'),
-//         '1.0.0',
-//         true
-//     );
+function skp_fbt_activate_plugin() {
+    skp_fbt_create_tables(); // calls your function to create/update tables
+}
 
-//     wp_localize_script('skp-fbt-js', 'skpFBT', [
-//         'ajax_url' => admin_url('admin-ajax.php')
-//     ]);
-// });
 
-// // AJAX handler for recommendations
-// add_action('wp_ajax_get_fbt_recommendations', 'skp_fbt_get_recommendations_ajax');
-// add_action('wp_ajax_nopriv_get_fbt_recommendations', 'skp_fbt_get_recommendations_ajax');

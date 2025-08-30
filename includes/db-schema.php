@@ -9,7 +9,7 @@ function skp_fbt_create_tables() {
     $sql = "CREATE TABLE $table_recs (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         product_id BIGINT UNSIGNED NOT NULL,
-        recommended_id BIGINT UNSIGNED NOT NULL,
+        recommendations JSON NOT NULL,
         score FLOAT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) $charset_collate;";

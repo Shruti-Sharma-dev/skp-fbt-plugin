@@ -1,40 +1,51 @@
-// assets/js/fbt-widget.js
-(function(){
-  if (typeof SKP_FBT === 'undefined') return;
-  const base = SKP_FBT.restBase;
-  const nonce = SKP_FBT.metricsNonce;
+document.addEventListener("DOMContentLoaded", function () {
+    const widget = document.getElementById("fbt-widget");
+    if (!widget) return;
 
-  function postEvent(payload){
-    payload.nonce = nonce;
-    fetch(base + '/metrics', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      credentials: 'same-origin',
-      body: JSON.stringify(payload)
-    }).catch(()=>{ /* fail gracefully */ });
-  }
+    const mainPrice = parseFloat(widget.dataset.mainPrice);
+    const mainId = widget.dataset.mainId;
+    const checkboxes = widget.querySelectorAll(".fbt-checkbox");
+    const subtotalDiv = document.getElementById("fbt-subtotal");
+    const totalSpan = document.getElementById("fbt-total");
+    const addBtn = document.getElementById("fbt-add-to-cart");
 
-  // On widget view
-  document.querySelectorAll('.skp-fbt-widget').forEach(function(widget){
-    const productEl = widget.querySelector('.skp-fbt-item');
-    const sessionId = window.SKPFbtSessionId || (window.SKPFbtSessionId = Math.random().toString(36).slice(2,12));
-    postEvent({ event: 'widget_view', session_id: sessionId, product_id: productEl ? productEl.dataset.rec : null, cohort: null });
+    function updateSubtotal() {
+        let subtotal = mainPrice;
+        let selected = 0;
 
-    // track clicks on rec links
-    widget.addEventListener('click', function(e){
-      const t = e.target.closest('.skp-fbt-item');
-      if (!t) return;
-      const rec = t.dataset.rec;
-      postEvent({ event: 'rec_click', session_id: sessionId, rec_id: rec });
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                subtotal += parseFloat(cb.dataset.price);
+                selected++;
+            }
+        });
+
+        if (selected > 0) {
+            subtotalDiv.style.display = "block";
+            totalSpan.textContent = "₹" + subtotal.toFixed(2);
+        } else {
+            subtotalDiv.style.display = "none";
+        }
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener("change", updateSubtotal));
+
+    addBtn.addEventListener("click", function () {
+        let productIds = [mainId];
+        checkboxes.forEach(cb => {
+            if (cb.checked) productIds.push(cb.dataset.id);
+        });
+
+        fetch(ajaxurl, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "action=fbt_add_to_cart&products[]=" + productIds.join("&products[]=")
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.data.cart_url; // redirect to cart
+            }
+        });
     });
-
-    // track add button
-    widget.addEventListener('click', function(e){
-      const btn = e.target.closest('.skp-fbt-add');
-      if (!btn) return;
-      const pid = btn.dataset.product;
-      // Here call standard WC add-to-cart or use AJAX; after that:
-      postEvent({ event: 'rec_add_to_cart', session_id: sessionId, rec_id: pid });
-    });
-  });
-})();
+});
