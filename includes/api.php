@@ -8,7 +8,7 @@ class SKP_FBT_API {
     }
 
     public function register_routes() {
-        register_rest_route( 'skp-fbt/v1', '/recommendations', [
+        register_rest_route( 'skp-fbt/v1', '/for-product/(?P<product_id>\d+)', [
             'methods' => 'GET',
             'callback' => [ $this, 'get_recommendations' ],
             'permission_callback' => '__return_true'
@@ -27,6 +27,16 @@ class SKP_FBT_API {
         // Require auth in production (for now open for testing)
         return current_user_can('manage_options') || true;
     }
+    ]);
+
+     register_rest_route('temp/v1', '/db-check', [
+        'methods' => 'GET',
+        'callback' => function() {
+            global $wpdb;
+            $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}skp_fbt_recommendations LIMIT 10", ARRAY_A);
+            return $results;
+        },
+        'permission_callback' => function() { return current_user_can('manage_options'); }
     ]);
 
     }
@@ -78,26 +88,52 @@ class SKP_FBT_API {
         return new WP_Error( 'invalid_data', 'Product ID and recommendations required', [ 'status' => 400 ] );
     }
 
-     $recs_json = wp_json_encode( $recs );
-    // Logging for debug
-    error_log('save_recommendations called for product_id: ' . $product_id);
-    error_log('Recommendations: ' . print_r($recs, true));
-    error_log('Score: ' . $score);
+    // Convert to JSON
+    $new_recs = (array) $recs;
 
-    // Save or update in DB
-    $wpdb->replace(
-        $table,
-        [
-            'product_id'     => $product_id,
-            'recommendations'=> $recs_json, // table column
-            'score'          => $score,
-            'created_at'     => current_time('mysql')
-        ],
-        [ '%d', '%s', '%f', '%s' ]
+    // Check if record exists
+    $existing = $wpdb->get_row(
+        $wpdb->prepare("SELECT recommendations FROM $table WHERE product_id = %d", $product_id)
     );
 
-    return [ 'success' => true, 'product_id' => $product_id, 'recommendations' => $recs, 'score' => $score ];
+    if ( $existing ) {
+        // Merge old + new
+        $old_recs = json_decode( $existing->recommendations, true );
+        $merged   = array_values(array_unique(array_merge($old_recs, $new_recs)));
+
+        $wpdb->update(
+            $table,
+            [
+                'recommendations' => wp_json_encode($merged),
+                'score'           => $score,
+                'created_at'      => current_time('mysql'),
+            ],
+            [ 'product_id' => $product_id ],
+            [ '%s', '%f', '%s' ],
+            [ '%d' ]
+        );
+    } else {
+        // Insert new
+        $wpdb->insert(
+            $table,
+            [
+                'product_id'      => $product_id,
+                'recommendations' => wp_json_encode($new_recs),
+                'score'           => $score,
+                'created_at'      => current_time('mysql'),
+            ],
+            [ '%d', '%s', '%f', '%s' ]
+        );
+    }
+
+    return [
+        'success'         => true,
+        'product_id'      => $product_id,
+        'recommendations' => $new_recs,
+        'score'           => $score
+    ];
 }
+
 
 }
 
