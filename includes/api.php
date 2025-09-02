@@ -77,6 +77,8 @@ class SKP_FBT_API {
 
 
    public function save_recommendations( $request ) {
+    error_log("Incoming POST: " . print_r($request->get_params(), true));
+
     global $wpdb;
     $table = $wpdb->prefix . 'skp_fbt_recommendations';
 
