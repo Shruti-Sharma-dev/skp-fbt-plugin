@@ -1,51 +1,78 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const widget = document.getElementById("fbt-widget");
-    if (!widget) return;
+    console.log("FBT DOMContentLoaded fired ✅");
 
-    const mainPrice = parseFloat(widget.dataset.mainPrice);
-    const mainId = widget.dataset.mainId;
-    const checkboxes = widget.querySelectorAll(".fbt-checkbox");
-    const subtotalDiv = document.getElementById("fbt-subtotal");
-    const totalSpan = document.getElementById("fbt-total");
-    const addBtn = document.getElementById("fbt-add-to-cart");
+    const productId = window.SKP_FBT_PRODUCT_ID;
+    console.log("Detected product ID:", productId);
 
-    function updateSubtotal() {
-        let subtotal = mainPrice;
-        let selected = 0;
+    if (!productId) return;
 
-        checkboxes.forEach(cb => {
-            if (cb.checked) {
-                subtotal += parseFloat(cb.dataset.price);
-                selected++;
-            }
-        });
-
-        if (selected > 0) {
-            subtotalDiv.style.display = "block";
-            totalSpan.textContent = "₹" + subtotal.toFixed(2);
-        } else {
-            subtotalDiv.style.display = "none";
-        }
-    }
-
-    checkboxes.forEach(cb => cb.addEventListener("change", updateSubtotal));
-
-    addBtn.addEventListener("click", function () {
-        let productIds = [mainId];
-        checkboxes.forEach(cb => {
-            if (cb.checked) productIds.push(cb.dataset.id);
-        });
-
-        fetch(ajaxurl, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "action=fbt_add_to_cart&products[]=" + productIds.join("&products[]=")
-        })
+    // Step 1: Get recommended IDs from custom API
+    fetch(`https://srikrishnanew-staging.us23.cdn-alpha.com/wp-json/skp-fbt/v1/for-product/${productId}`)
         .then(res => res.json())
         .then(data => {
-            if (data.success) {
-                window.location.href = data.data.cart_url; // redirect to cart
+            console.log("FBT API Data:", data);
+
+            if (!(data.success && data.recommendations.length > 0)) {
+                console.warn("No recommendations available ❌");
+                return;
             }
-        });
-    });
+
+            const recIds = data.recommendations.slice(0, 3).map(r => r.rec_id);
+            console.log("Recommendation IDs:", recIds);
+
+            // Step 2: Fetch product details from Woo API
+            return fetch(`https://srikrishnanew-staging.us23.cdn-alpha.com/wp-json/wc/store/products?include=${recIds.join(",")}`);
+        })
+        .then(res => res.json())
+        .then(products => {
+            console.log("WooCommerce Product Data:", products);
+
+            const container = document.getElementById("fbt-products");
+            if (!container) {
+                console.warn("FBT container not found ❌");
+                return;
+            }
+
+products.forEach(p => {
+  console.log("Rendering product:", p.id, p.name, p.prices, p.images);
+
+  const imgSrc = (p.images && p.images.length > 0) ? p.images[0].src : '';
+  const displayPrice = p.prices?.price ? `${p.prices.price} ${p.prices.currency_code}` : '';
+
+  const card = document.createElement("div");
+  card.className = "fbt-card";
+
+  card.innerHTML = `
+      <label>
+          <input type="checkbox" class="fbt-checkbox" data-id="${p.id}">
+          <img src="${imgSrc}" alt="${p.name}" width="60">
+          <span>${p.name}</span> - <strong>${displayPrice}</strong>
+      </label>
+  `;
+
+  container.appendChild(card);
+});
+
+// ✅ Add "Add Selected to Cart" button once
+const addBtn = document.createElement("button");
+addBtn.textContent = "Add Selected to Cart";
+addBtn.addEventListener("click", () => {
+  const selected = [...container.querySelectorAll(".fbt-checkbox:checked")].map(cb => cb.dataset.id);
+  console.log("Selected IDs:", selected);
+
+  selected.forEach(id => {
+    fetch("https://srikrishnanew-staging.us23.cdn-alpha.com/wp-json/wc/store/cart/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: parseInt(id), quantity: 1 })
+    })
+    .then(r => r.json())
+    .then(r => console.log("Cart add response:", r))
+    .catch(err => console.error("Cart API error:", err));
+  });
+});
+container.appendChild(addBtn);
+
+        })
+        .catch(err => console.error("FBT Widget Error:", err));
 });

@@ -18,23 +18,40 @@ include plugin_dir_path(__FILE__) . 'includes/class-skp-fbt-settings.php';
 /**
  * Enqueue scripts and pass nonce + REST URL to JS
  */
-add_action('wp_enqueue_scripts', function() {
-    wp_enqueue_script(
-        'fbt-widget',
-        plugin_dir_url(__FILE__) . 'assets/js/fbt-widget.js',
-        [], // no jQuery dependency
-        false,
-        true // load in footer
-        
+// Enqueue scripts
+function enqueue_fbt_assets() {
+    wp_enqueue_style(
+        'fbt-widget-css',
+        plugin_dir_url(__FILE__) . 'assets/fbt-styles.css'
     );
 
+    wp_enqueue_script(
+        'fbt-widget-js',
+        plugin_dir_url(__FILE__) . 'assets/js/fbt-widget.js',
+        [],
+        false,
+        true
+    );
+}
+add_action('wp_enqueue_scripts', 'enqueue_fbt_assets');
 
-//     // Pass nonce and rest URL to JS
-    wp_localize_script('fbt-widget', 'fbtData', [
-        'nonce'   => wp_create_nonce('skp_fbt_nonce'),
-        'restUrl' => esc_url_raw(rest_url('skp-fbt/v1/'))
-    ]);
-});
+// Localize script on single product page
+function localize_fbt_script() {
+    if (!function_exists('is_product')) return;
+
+    if (is_product()) {
+        global $post;
+        if ($post && isset($post->ID)) {
+            wp_localize_script('fbt-widget-js', 'SKP_FBT_PRODUCT', [
+                'id' => $post->ID
+            ]);
+        }
+    }
+}
+add_action('wp_enqueue_scripts', 'localize_fbt_script', 30); // increase priority
+
+
+
 
 /**
  * On plugin activation, create/update DB tables

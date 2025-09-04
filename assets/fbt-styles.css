@@ -1,66 +1,35 @@
-.fbt-widget {
-  border: 1px solid #e5e5e5;
-  padding: 15px;
-  margin-top: 20px;
-  border-radius: 8px;
-  background: #fafafa;
-}
-
-.fbt-widget h3 {
-  font-size: 18px;
-  margin-bottom: 12px;
-  font-weight: 600;
-  color: #333;
-}
-
-.fbt-products {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.fbt-product {
+.fbt-card {
+  border: 1px solid #eee;
+  padding: 10px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #fff;
-  padding: 8px 12px;
+  gap: 10px;              /* space between checkbox, img, text */
+}
+
+.fbt-card img {
+  max-width: 60px;
+  height: auto;
   border: 1px solid #ddd;
-  border-radius: 6px;
+}
+
+.fbt-card label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
-  transition: background 0.2s ease-in-out;
 }
-
-.fbt-product:hover {
-  background: #f9f9f9;
-}
-
-.fbt-product img {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.fbt-product span {
-  font-size: 14px;
-  color: #444;
-}
-
-.fbt-form button {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #2c7be5;
+.fbt-add-selected {
+  background: #28a745;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 8px 15px;
   cursor: pointer;
-  transition: background 0.2s ease-in-out;
+  margin-top: 10px;
+  display: block;
+  width: 100%;
+  text-align: center;
 }
-
-.fbt-form button:hover {
-  background: #1a5ec8;
+.fbt-add-selected:hover {
+  background: #218838;
 }

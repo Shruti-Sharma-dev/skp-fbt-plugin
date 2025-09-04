@@ -5,21 +5,6 @@ function skp_fbt_create_tables() {
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
 
-
-
-
-    $table_recs = $wpdb->prefix . "skp_fbt_recommendations";
-    $sql = "CREATE TABLE $table_recs (
-        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        product_id BIGINT UNSIGNED NOT NULL,
-        recommendations JSON NOT NULL,
-        score FLOAT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) $charset_collate;";
-
-
-
-
      // item→item (core)
     $sql1 = "CREATE TABLE {$wpdb->prefix}skp_fbt_item_item (
         product_id BIGINT NOT NULL,
@@ -54,7 +39,7 @@ function skp_fbt_create_tables() {
  
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-    dbDelta( $sql );
+
     dbDelta( $sql1 );
     dbDelta( $sql2 );
     dbDelta( $sql3 );

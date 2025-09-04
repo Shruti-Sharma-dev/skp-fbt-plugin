@@ -8,11 +8,12 @@ class SKP_FBT_API {
     }
 
     public function register_routes() {
-        register_rest_route( 'skp-fbt/v1', '/for-product/(?P<product_id>\d+)', [
+   register_rest_route('skp-fbt/v1', '/for-product/(?P<product_id>\d+)', [
             'methods' => 'GET',
-            'callback' => [ $this, 'get_recommendations' ],
+            'callback' => [ $this, 'get_item_item_recommendations' ],
             'permission_callback' => '__return_true'
         ]);
+
 
         register_rest_route( 'skp-fbt/v1', '/track-event', [
             'methods' => 'POST',
@@ -20,11 +21,6 @@ class SKP_FBT_API {
             'permission_callback' => '__return_true'
         ]);
 
-        register_rest_route( 'skp-fbt/v1', '/save-recommendations', [
-    'methods' => 'POST',
-    'callback' => [ $this, 'save_recommendations' ],
-    'permission_callback' => '__return_true'
-    ]);
     register_rest_route( 'skp-fbt/v1', '/save-recs', [
     'methods' => 'POST',
     'callback' => [ $this, 'save_item_item_recommendations' ],
@@ -45,71 +41,45 @@ class SKP_FBT_API {
  
 
 
-    // save recommendation
-
-
-
-//    public function get_recommendations( $request ) {
-//         global $wpdb;
-//     $table = $wpdb->prefix . 'skp_fbt_recommendations';
-
-//     $product_id = intval( $request['product_id'] );
-
-//     $row = $wpdb->get_row(
-//         $wpdb->prepare("SELECT recommendations FROM $table WHERE product_id = %d", $product_id),
-//         ARRAY_A
-//     );
-
-//     if ( ! $row ) {
-//         return [ 'success' => false, 'message' => 'No recommendations found.' ];
-//     }
-
-//     $recs = json_decode( $row['recommendations'], true );
-//     error_log("SKP DEBUG product_id: " . $product_id);
-//     error_log(print_r($row, true));
-
-//     return [
-//         'success'         => true,
-//         'product_id'      => $product_id,
-//         'recommendations' => $recs
-//     ];
-//     }
-
-
-
-
-
-  public function get_item_item_recommendations( $request ) {
+public function get_item_item_recommendations( $request ) {
     global $wpdb;
     $table = $wpdb->prefix . 'skp_fbt_item_item';
-
     $product_id = intval( $request['product_id'] );
 
-    if ( ! $product_id ) {
+    if (!$product_id) {
         return new WP_Error('invalid_data', 'Product ID is required', ['status' => 400]);
     }
 
     $results = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT rec_id, score FROM $table WHERE product_id = %d ORDER BY score DESC",
-            $product_id
+          "SELECT rec_id, score 
+         FROM {$wpdb->prefix}skp_fbt_item_item 
+         WHERE product_id = %d AND score > 0 
+         ORDER BY score DESC 
+         LIMIT 3",
+        $product_id
         ),
         ARRAY_A
     );
 
-    if ( empty($results) ) {
+    if (empty($results)) {
         return [
             'success' => false,
-            'message' => 'No recommendations found.',
+            'message' => 'No recommendations found',
             'product_id' => $product_id,
             'recommendations' => []
         ];
     }
 
     return [
-        'success'         => true,
-        'product_id'      => $product_id,
-        'recommendations' => $results
+        'success' => true,
+        'product_id' => $product_id,
+        'recommendations' => array_map(function($row){
+            return [
+                'rec_id' => intval($row['rec_id']),
+                'score' => floatval($row['score'])
+            ];
+        }, $results)
     ];
 }
 
@@ -127,145 +97,62 @@ class SKP_FBT_API {
     }
 
 
-public function save_recommendations( $request ) {
-    // Log incoming request for debugging
-    error_log("Incoming POST: " . print_r($request->get_params(), true));
-
-    global $wpdb;
-    $table = $wpdb->prefix . 'skp_fbt_recommendations';
-
-    $product_id = intval( $request['product_id'] );
-    $recs       = $request['recommendations']; // could be array of strings
-    $score      = isset($request['score']) ? floatval($request['score']) : 0;
-
-    // Validate
-    if ( ! $product_id || empty($recs) || !is_array($recs) ) {
-        return new WP_Error( 'invalid_data', 'Product ID and recommendations required', [ 'status' => 400 ] );
-    }
-
-    // Convert all recommendations to integers to avoid string issues
-    $new_recs = array_map('intval', $recs);
-
-    // Check if record exists
-    $existing = $wpdb->get_row(
-        $wpdb->prepare("SELECT recommendations FROM $table WHERE product_id = %d", $product_id)
-    );
-
-    if ( $existing ) {
-        // Merge old + new recommendations and remove duplicates
-        $old_recs = json_decode( $existing->recommendations, true );
-        $merged   = array_values(array_unique(array_merge($old_recs, $new_recs)));
-
-        $result = $wpdb->update(
-            $table,
-            [
-                'recommendations' => wp_json_encode($merged),
-                'score'           => $score,
-                'created_at'      => current_time('mysql'),
-            ],
-            [ 'product_id' => $product_id ],
-            [ '%s', '%f', '%s' ],
-            [ '%d' ]
-        );
-        error_log("Update result for product $product_id: " . print_r($result, true));
-    } else {
-        // Insert new record
-        $result = $wpdb->insert(
-            $table,
-            [
-                'product_id'      => $product_id,
-                'recommendations' => wp_json_encode($new_recs),
-                'score'           => $score,
-                'created_at'      => current_time('mysql'),
-            ],
-            [ '%d', '%s', '%f', '%s' ]
-        );
-        error_log("Insert result for product $product_id: " . print_r($result, true));
-    }
-
-    return [
-        'success'         => true,
-        'product_id'      => $product_id,
-        'recommendations' => $new_recs,
-        'score'           => $score
-    ];
-}
-
-
-
-
-
 
 public function save_item_item_recommendations( $request ) {
     global $wpdb;
     $table = $wpdb->prefix . 'skp_fbt_item_item';
 
     $product_id = intval( $request['product_id'] );
-    $recs       = $request['recommendations']; // array of arrays ['rec_id' => .., 'score' => ..]
+    $rec_id     = intval( $request['rec_id'] );
+    $score      = floatval( $request['score'] );
 
     // Validate input
-    if ( ! $product_id || empty($recs) || !is_array($recs) ) {
-        return new WP_Error('invalid_data', 'Product ID and recommendations required', ['status' => 400]);
+    if ( ! $product_id || ! $rec_id ) {
+        return new WP_Error('invalid_data', 'Product ID and rec_id required', ['status' => 400]);
     }
 
-    foreach ($recs as $rec) {
-        $rec_id = intval($rec['rec_id']);
-        $score  = floatval($rec['score']);
+    // Check if the recommendation already exists
+    $exists = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $table WHERE product_id = %d AND rec_id = %d",
+        $product_id, $rec_id
+    ));
 
-        // Check if the recommendation already exists
-        $exists = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $table WHERE product_id = %d AND rec_id = %d",
-            $product_id, $rec_id
-        ));
-
-        if ($exists) {
-            // Update existing row
-            $wpdb->update(
-                $table,
-                [
-                    'score'      => $score,
-                    'updated_at' => current_time('mysql')
-                ],
-                [
-                    'product_id' => $product_id,
-                    'rec_id'     => $rec_id
-                ],
-                [
-                    '%f',
-                    '%s'
-                ],
-                [
-                    '%d',
-                    '%d'
-                ]
-            );
-        } else {
-            // Insert new row
-            $wpdb->insert(
-                $table,
-                [
-                    'product_id' => $product_id,
-                    'rec_id'     => $rec_id,
-                    'score'      => $score,
-                    'updated_at' => current_time('mysql')
-                ],
-                [
-                    '%d',
-                    '%d',
-                    '%f',
-                    '%s'
-                ]
-            );
-        }
+    if ($exists) {
+        // Update existing row
+        $wpdb->update(
+            $table,
+            [
+                'score'      => $score,
+                'updated_at' => current_time('mysql')
+            ],
+            [
+                'product_id' => $product_id,
+                'rec_id'     => $rec_id
+            ],
+            [ '%f', '%s' ],
+            [ '%d', '%d' ]
+        );
+    } else {
+        // Insert new row
+        $wpdb->insert(
+            $table,
+            [
+                'product_id' => $product_id,
+                'rec_id'     => $rec_id,
+                'score'      => $score,
+                'updated_at' => current_time('mysql')
+            ],
+            [ '%d', '%d', '%f', '%s' ]
+        );
     }
 
     return [
         'success'    => true,
         'product_id' => $product_id,
-        'count'      => count($recs)
+        'rec_id'     => $rec_id,
+        'score'      => $score
     ];
 }
-
 
 
 
