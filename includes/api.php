@@ -55,8 +55,7 @@ public function get_item_item_recommendations( $request ) {
           "SELECT rec_id, score 
          FROM {$wpdb->prefix}skp_fbt_item_item 
          WHERE product_id = %d AND score > 0 
-         ORDER BY score DESC 
-         LIMIT 3",
+         ORDER BY score DESC ",
         $product_id
         ),
         ARRAY_A
