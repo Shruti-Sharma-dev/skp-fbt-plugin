@@ -11,44 +11,56 @@
 
 /* Widget title */
 .cyl-widget h3 {
-    font-size: 18px;
+   font-size: 18px;
     font-weight: 600;
     margin-bottom: 15px;
 }
 
 /* ===== Each product card ===== */
-.skp-cyl-item {
+.cyl-widget .skp-cyl-item {
     display: flex;
     align-items: center;
     padding: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     border: 1px solid #ddd; /* card border */
-   
+    
     transition: background-color 0.3s ease;
 }
 
 /* Hover effect for card */
 /* Product image */
-.skp-cyl-item img {
+.cyl-widget .skp-cyl-item img {
     width: 50px;
     height: 50px;
     object-fit: cover;
     margin-right: 10px;
-    border-radius: 4px;
+
 }
 
 /* Product name */
-.skp-cyl-item .fbt-product-name {
+.cyl-widget .skp-cyl-item .fbt-product-name {
     font-size: 14px;
     font-weight: 500;
     margin-right: auto;
 }
+/* 
+Product price */
 
-/* Product price */
-.skp-cyl-item .fbt-price {
-    font-size: 13px;
-    color: #333;
-    margin-left: 10px;
+.cyl-widget .skp-cyl-item .price-box {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin-left: auto; /* push to the right */
+}
+.price-box .regular {
+  text-decoration: line-through;
+  color: grey;
+  margin-right: 8px;
+}
+
+.price-box .sale {
+  color: #000000; /* red-ish for highlight */
+
 }
 
 /* Checkbox styling */
@@ -58,20 +70,38 @@
 }
 
 /* ===== Add to Cart Button ===== */
-.skp-cyl-item .cyl-add-to-cart {
-    padding: 6px 12px;
+.cyl-widget #add-selected-to-cart {
+    padding: 8px 14px;
     font-size: 13px;
     border: 1px solid #000;
-    border-radius: 4px;
-    background-color: #fff;
-    color: #000;
+
+    background-color: #000000;
+    color: #ffffff;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-left: 10px;
+    margin-top: 15px;
+  
 }
 
 /* Hover effect for button */
-.skp-cyl-item .cyl-add-to-cart:hover {
-    background-color: #000;
-    color: #fff;
+.cyl-widget #add-selected-to-cart:hover {
+    background-color: #2b2b2b;
+    color: #ffffff;
+}
+
+#bundle-subtotal {
+  display: flex;
+  justify-content: space-between; /* text left, value right */
+  align-items: center;
+  margin-top: 15px;
+
+  font-weight: bold;
+}
+
+#bundle-subtotal .label {
+  color: #333;  /* optional styling */
+}
+
+#bundle-subtotal .value {
+  color: #000;
 }

@@ -18,4 +18,4 @@ function render_fbt_widget() {
 
     <?php
 }
-add_action('woocommerce_after_add_to_cart_button', 'render_fbt_widget');
+add_action('woocommerce_after_add_to_cart_form', 'render_fbt_widget');

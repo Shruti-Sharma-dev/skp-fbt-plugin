@@ -12,9 +12,13 @@ function render_fbt_widget_cart_page_simple() {
         <h3>Complete Your Look</h3>
         <div id="cyl-products"></div>
     </div>
-    <script>
-        window.SKP_FBT_CART_PRODUCT_IDS = <?php echo json_encode($product_ids); ?>;
-    </script>
+   <script>
+if (!window.SKP_CYL_PRODUCT_IDS) {
+    window.SKP_CYL_PRODUCT_IDS = <?php echo json_encode($product_ids); ?>;
+    console.log('CYL Product IDs set in JS:', window.SKP_CYL_PRODUCT_IDS);
+}
+</script>
+
     <?php
 }
 add_action('woocommerce_cart_collaterals', 'render_fbt_widget_cart_page_simple');
