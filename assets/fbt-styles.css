@@ -100,5 +100,5 @@
     margin-top: 15px;
 }
 
-.bundle-subtotal .label { color: #000000; }
-.bundle-subtotal .value { color: #000; }
+.bundle-total .label { color: #000000; }
+.bundle-total .value { color: #000; }

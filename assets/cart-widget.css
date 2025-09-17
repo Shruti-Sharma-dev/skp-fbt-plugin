@@ -4,7 +4,7 @@
     padding: 15px;
     margin-top: 20px;
     background-color: #fff;
-    width:50%
+    width:60%
     
  
 }
@@ -71,7 +71,7 @@ Product price */
 
 /* ===== Add to Cart Button ===== */
 .cyl-widget #add-selected-to-cart {
-    padding: 8px 14px;
+    padding: 10px 20px;
     font-size: 13px;
     border: 1px solid #000;
 

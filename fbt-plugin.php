@@ -8,12 +8,15 @@
 
 if (!defined('ABSPATH')) exit;
 
+
+require_once plugin_dir_path(__FILE__) . 'includes/skp-ga4.php';
 include plugin_dir_path(__FILE__) . 'includes/db-schema.php';
 include plugin_dir_path(__FILE__) . 'includes/api.php';
-// include plugin_dir_path(__FILE__) . 'includes/functions.php';
+include plugin_dir_path(__FILE__) . 'includes/functions.php';
 include plugin_dir_path(__FILE__) . 'templates/product-widget.php';
 include plugin_dir_path(__FILE__) . 'templates/cart-widget.php';
 include plugin_dir_path(__FILE__) . 'includes/class-skp-fbt-settings.php';
+
 
 
 function enqueue_fbt_assets() {

@@ -17,7 +17,7 @@ class SKP_FBT_API {
 
          register_rest_route('skp-fbt/v1', '/metrics', [
             'methods'  => 'POST',
-            'callback' => [ $this, 'capture_metrics_event' ],
+            'callback' => [ $this, 'skp_fbt_save_event' ],
             'permission_callback' => '__return_true', // public, or tighten later
         ]);
 
@@ -154,57 +154,36 @@ public function save_item_item_recommendations( $request ) {
 
 
 
- function skp_fbt_capture_metrics_event( WP_REST_Request $request ) {
+ function skp_fbt_save_event() {
     global $wpdb;
+
     $table = $wpdb->prefix . 'skp_fbt_metrics';
+    $data = json_decode(file_get_contents('php://input'), true);
 
-    // 🔹 Parse JSON body from fetch
-    $params = $request->get_json_params();
-    $product_id = intval( $params['product_id'] ?? 0 );
-    $event      = sanitize_text_field( $params['event'] ?? '' );
-
-   
-    $cohort     = sanitize_text_field( $params['cohort'] ?? 'A' ); // default cohort
-    $user_id    = get_current_user_id();
-    $session_id = null;
-if ( WC()->session ) {
-    $session_id = WC()->session->get_session_id();
-}
-    
-    if ( empty($event) || empty($product_id) ) {
-        return new WP_Error( 'invalid_data', 'Event or product_id missing', [ 'status' => 400 ] );
+    if (!$data || !isset($data['event'], $data['session_id'])) {
+        wp_send_json_error(['message' => 'Invalid data']);
+        return;
     }
 
     $wpdb->insert(
-         $table,
-    [
-        'event'       => $event,
-        'product_id'  => $product_id,
-        'rec_id'      => $rec_id ?? null,
-        'order_id'    => $order_id ?? null,
-        'cohort'      => $cohort ?? null,
-        'user_id'     => $user_id,
-        'session_id'  => $session_id,
-        'created_at'  => current_time('mysql', 1),
-        'ts'          => time(),
-    ],
-    [ '%s','%d','%d','%d','%s','%d','%s','%s','%d' ]
+        $table,
+        [
+            'ts'         => current_time('mysql'),
+            'user_id'    => $data['user_id'] ?? null,
+            'session_id' => $data['session_id'],
+            'event'      => sanitize_text_field($data['event']),
+            'product_id' => $data['product_id'] ?? null,
+            'rec_id'     => $data['rec_id'] ?? null,
+            'order_id'   => $data['order_id'] ?? null,
+            'cohort'     => $data['cohort'] ?? null,
+        ],
+        [
+            '%s','%d','%s','%s','%d','%d','%d','%s'
+        ]
     );
 
-    if ( $wpdb->last_error ) {
-        return new WP_Error( 'db_error', $wpdb->last_error, [ 'status' => 500 ] );
-    }
-
-    return [
-        'success'    => true,
-        'event'      => $event,
-        'product_id' => $product_id,
-        'rec_id'     => $rec_id,
-        'order_id'   => $order_id
-    ];
+    wp_send_json_success(['message' => 'Event saved']);
 }
-
-
 
 }
 
