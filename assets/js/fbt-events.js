@@ -4,10 +4,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const sessionId = SKP_FBT_DATA.session_id;
   const userId = SKP_FBT_DATA.user_id;
   const cohort = SKP_FBT_DATA.cohort;
+  const productId = SKP_FBT_DATA?.product_id || window.SKP_FBT_PRODUCT_ID || null;
 
   console.log("Session ID:", sessionId);
   console.log("User ID:", userId);
   console.log("Cohort:", cohort);
+  console.log("Product ID:", productId);
+
+  if (!productId) {
+    console.warn("No product ID found, aborting FBT event tracking ❌");
+    return;
+  }
 
   function waitForGtag(cb) {
     if (typeof gtag === 'function') {
@@ -23,20 +30,14 @@ document.addEventListener("DOMContentLoaded", function () {
       event: eventType,
       session_id: sessionId,
       user_id: userId,
-      product_id: productId,
-      rec_id: recId,
-      order_id: orderId,
+      product_id: productId, // PDP product id
+      rec_id: recId,         // recommended product id
+      order_id: orderId,     // actual Woo order id (yahan abhi null)
       cohort: cohort
     };
 
     waitForGtag(() => {
-      gtag('event', eventType, {
-        product_id: productId,
-        rec_id: recId,
-        order_id: orderId,
-        session_id: sessionId,
-        cohort: cohort
-      });
+      gtag('event', eventType, payload);
       console.log("GA4 Event Fired ✅", eventType, payload);
     });
 
@@ -53,9 +54,8 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch(err => console.error("FBT Metric Error ❌", err));
   }
 
-  // ---------------------------
-  // Init function with retry
-  // ---------------------------
+
+  
   function initFbtTracking() {
     const fbtProducts = document.querySelectorAll(".fbt-card");
     console.log("Checking FBT cards, found:", fbtProducts.length);
@@ -64,15 +64,14 @@ document.addEventListener("DOMContentLoaded", function () {
       // Impression Event
       fbtProducts.forEach(card => {
         const recId = card.querySelector(".fbt-checkbox")?.dataset.id || null;
-  
         console.log("Impression recId:", recId);
-        sendEvent('impression', productId, null, recId);
+        sendEvent('impression', productId, recId, null);
 
         // Click Event
         const link = card.querySelector(".fbt-link");
         link?.addEventListener('click', () => {
           console.log("Click fired on recId:", recId);
-          sendEvent('click', productId, null, recId);
+          sendEvent('click', productId, recId, null);
         });
       });
 
@@ -83,9 +82,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const selected = [...document.querySelectorAll(".fbt-checkbox:checked")];
         selected.forEach(cb => {
           const recId = cb.dataset.id;
-          const productId = cb.dataset.id;
           console.log("Sending Add to cart for:", recId);
-          sendEvent('Add to cart', productId, recId);
+          sendEvent('Add to cart', productId, recId, null);
         });
       });
     } else {
