@@ -1,107 +1,136 @@
 /* ===== Complete Your Look Widget Container ===== */
 .cyl-widget {
-    border: 1px solid #ccc; /* grey border for widget */
+    border: 1px solid #ccc;
     padding: 15px;
     margin-top: 20px;
     background-color: #fff;
-    width:60%
-    
- 
+    width: 100%; /* match cart widget width */
+    max-width: 800px; /* optional: keep aligned like cart widget */
+    box-sizing: border-box;
 }
 
-/* Widget title */
+
 .cyl-widget h3 {
-   font-size: 18px;
+    font-size: 18px;
     font-weight: 600;
     margin-bottom: 15px;
 }
 
-/* ===== Each product card ===== */
+
 .cyl-widget .skp-cyl-item {
     display: flex;
     align-items: center;
     padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ddd; /* card border */
-    
+    border: 1px solid #ddd;
     transition: background-color 0.3s ease;
+    flex-wrap: wrap;
 }
 
-/* Hover effect for card */
-/* Product image */
 .cyl-widget .skp-cyl-item img {
     width: 50px;
     height: 50px;
     object-fit: cover;
     margin-right: 10px;
-
+    flex-shrink: 0;
 }
 
-/* Product name */
 .cyl-widget .skp-cyl-item .fbt-product-name {
     font-size: 14px;
     font-weight: 500;
     margin-right: auto;
 }
-/* 
-Product price */
 
 .cyl-widget .skp-cyl-item .price-box {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  margin-left: auto; /* push to the right */
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    margin-left: auto;
+    flex-shrink: 0;
 }
+
 .price-box .regular {
-  text-decoration: line-through;
-  color: grey;
-  margin-right: 8px;
+    text-decoration: line-through;
+    color: grey;
+    margin-right: 8px;
 }
 
 .price-box .sale {
-  color: #000000; /* red-ish for highlight */
-
+    color: #000000;
 }
 
-/* Checkbox styling */
+
 .skp-cyl-item .fbt-checkbox {
     margin-right: 10px;
     cursor: pointer;
 }
 
-/* ===== Add to Cart Button ===== */
+
 .cyl-widget #add-selected-to-cart {
     padding: 10px 20px;
     font-size: 13px;
     border: 1px solid #000;
-
     background-color: #000000;
     color: #ffffff;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 15px;
   
+    box-sizing: border-box;
 }
 
-/* Hover effect for button */
 .cyl-widget #add-selected-to-cart:hover {
     background-color: #2b2b2b;
     color: #ffffff;
 }
 
 #bundle-subtotal {
-  display: flex;
-  justify-content: space-between; /* text left, value right */
-  align-items: center;
-  margin-top: 15px;
-
-  font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    font-weight: bold;
 }
 
-#bundle-subtotal .label {
-  color: #333;  /* optional styling */
+#bundle-subtotal .label { color: #333; }
+#bundle-subtotal .value { color: #000; }
+
+
+
+/* Tablet */
+@media (max-width: 768px) {
+    .cyl-widget {
+        width: 100%;
+    }
+
+    .cyl-widget .skp-cyl-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cyl-widget .skp-cyl-item img {
+        margin-bottom: 8px;
+    }
+
+    .cyl-widget .skp-cyl-item .price-box {
+        margin-left: 0;
+        margin-top: 5px;
+    }
 }
 
-#bundle-subtotal .value {
-  color: #000;
+/* Mobile */
+@media (max-width: 480px) {
+    .cyl-widget h3 {
+        font-size: 16px;
+    }
+
+    .cyl-widget .skp-cyl-item .fbt-product-name {
+        font-size: 13px;
+    }
+
+    .cyl-widget #add-selected-to-cart {
+        font-size: 14px;
+        padding: 10px;
+        width: 100%;
+    }
 }

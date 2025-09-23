@@ -27,14 +27,12 @@ class SKP_FBT_API {
     'permission_callback' => '__return_true'
     ]);
 
-     register_rest_route('temp/v1', '/db-check', [
-        'methods' => 'GET',
-        'callback' => function() {
-            global $wpdb;
-            $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}skp_fbt_recommendations LIMIT 10", ARRAY_A);
-            return $results;
-        },
-        'permission_callback' => function() { return current_user_can('manage_options'); }
+    register_rest_route( 'skp-fbt/v1', '/config', [
+
+
+        'method' => 'GET',
+        'callback' => [$this, 'skp_fbt_get_config'],
+        'permission_callback' => '__return_true'
     ]);
 
     }
@@ -52,7 +50,7 @@ public function get_item_item_recommendations( $request ) {
 
     $results = $wpdb->get_results(
         $wpdb->prepare(
-          "SELECT rec_id, score 
+        "SELECT rec_id, score 
          FROM {$wpdb->prefix}skp_fbt_item_item 
          WHERE product_id = %d AND score > 0 
          ORDER BY score DESC ",
@@ -97,12 +95,12 @@ public function save_item_item_recommendations( $request ) {
     $rec_id     = intval( $request['rec_id'] );
     $score      = floatval( $request['score'] );
 
-    // Validate input
+
     if ( ! $product_id || ! $rec_id ) {
         return new WP_Error('invalid_data', 'Product ID and rec_id required', ['status' => 400]);
     }
 
-    // Check if the recommendation already exists
+
     $exists = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM $table WHERE product_id = %d AND rec_id = %d",
         $product_id, $rec_id
@@ -147,13 +145,6 @@ public function save_item_item_recommendations( $request ) {
 
 
 
-
-
-
-
-
-
-
  function skp_fbt_save_event() {
     global $wpdb;
 
@@ -183,6 +174,16 @@ public function save_item_item_recommendations( $request ) {
     );
 
     wp_send_json_success(['message' => 'Event saved']);
+}
+
+
+public function skp_fbt_get_config() {
+    return [
+         'min_occurrence' => get_option('skp_fbt_min_cooccurrence', 2),
+         'top_n'          => get_option('skp_fbt_top_n', 3),
+         'price_band'     => get_option('skp_fbt_price_band', 20)
+    ];
+
 }
 
 }

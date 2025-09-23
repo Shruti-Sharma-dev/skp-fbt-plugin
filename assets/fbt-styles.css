@@ -1,10 +1,11 @@
-/* ===== FBT Widget Container ===== */
+
 .fbt-widget {
     border: 1px solid #e9e8e8;
     padding: 15px;
     background-color: #fff;
     margin-top: 20px;
     display: block;
+    margin-bottom: 20px;
 }
 
 .fbt-widget h3 {
@@ -13,13 +14,14 @@
     margin-bottom: 15px;
 }
 
-/* ===== Product card ===== */
+
 .fbt-card {
     display: flex;
     align-items: center;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
+    flex-wrap: wrap; /* allows wrapping on smaller screens */
 }
 
 .fbt-card img {
@@ -28,6 +30,7 @@
     object-fit: cover;
     margin-right: 10px;
     border-radius: 4px;
+    flex-shrink: 0;
 }
 
 .fbt-product-name {
@@ -40,22 +43,25 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .fbt-card .fbt-link {
     display: flex;
     align-items: center;
-    flex: 1;
+    flex: 1 1 auto;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
-/* ===== Price box ===== */
+
 .fbt-card .price-box {
     margin-left: auto;
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 .price-box .regular {
@@ -68,13 +74,11 @@
     font-weight: 600;
 }
 
-/* ===== Checkbox ===== */
 .fbt-checkbox {
     margin-right: 10px;
     cursor: pointer;
 }
 
-/* ===== Add to cart button ===== */
 .add-selected-to-cart {
     padding: 8px 20px;
     font-size: 14px;
@@ -84,6 +88,8 @@
     cursor: pointer;
     margin-top: 15px;
     transition: all 0.3s ease;
+    
+    box-sizing: border-box;
 }
 
 .add-selected-to-cart:hover {
@@ -91,14 +97,51 @@
     color: #ffffff;
 }
 
-/* ===== Bundle subtotal ===== */
+
 .bundle-total {
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-weight: bold;
     margin-top: 15px;
+    flex-wrap: wrap;
 }
 
 .bundle-total .label { color: #000000; }
 .bundle-total .value { color: #000; }
+
+
+
+/* Tablet (<= 768px) */
+@media (max-width: 768px) {
+    .fbt-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fbt-card img {
+        margin-bottom: 8px;
+    }
+
+    .fbt-card .price-box {
+        margin-left: 0;
+        margin-top: 5px;
+    }
+}
+
+/* Mobile (<= 480px) */
+@media (max-width: 480px) {
+    .fbt-widget h3 {
+        font-size: 16px;
+    }
+
+    .fbt-product-name {
+        font-size: 11px;
+    }
+
+    .add-selected-to-cart {
+        padding: 10px;
+        font-size: 12px;
+        width: 100%;
+    }
+}

@@ -18,4 +18,9 @@ function render_fbt_widget() {
 
     <?php
 }
-add_action('woocommerce_after_add_to_cart_form', 'render_fbt_widget');
+
+add_action('woocommerce_init', function() {
+    $render_hook = get_option('skp_fbt_placement', 'woocommerce_after_add_to_cart_form');
+    add_action($render_hook, 'render_fbt_widget');
+});
+

@@ -40,8 +40,9 @@ document.addEventListener("DOMContentLoaded", function () {
       // ✅ Bundle total container
       const bundleTotal = document.createElement("div");
       bundleTotal.className = "bundle-total";
+      bundleTotal.style.visibility = "hidden"; // hide initially
       bundleTotal.innerHTML = `<span class="label">Bundle Subtotal:</span>
-        <span class="value">₹0.00</span>`;
+        <span class="value" >₹0.00</span>`;
       const subtotalEl = bundleTotal.querySelector(".value");
 
       // ✅ Add to cart button
@@ -60,10 +61,13 @@ document.addEventListener("DOMContentLoaded", function () {
             (sum, c) => sum + parseFloat(c.dataset.price || 0),
             0
           );
+          
           subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+          bundleTotal.style.visibility = "visible";
           addBtn.disabled = false;
         } else {
           subtotalEl.textContent = `₹0.00`;
+          bundleTotal.style.visibility = "hidden";
           addBtn.disabled = true;
         }
       }

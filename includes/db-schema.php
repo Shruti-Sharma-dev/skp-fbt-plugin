@@ -19,7 +19,7 @@ function skp_fbt_create_tables() {
     // user recs (optional cache)
     $sql2 = "CREATE TABLE {$wpdb->prefix}skp_fbt_user_recs (
         user_id BIGINT NOT NULL PRIMARY KEY,
-        rec_ids JSON NOT NULL,
+        rec_id BIGINT NOT NULL,
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB $charset;";
  
