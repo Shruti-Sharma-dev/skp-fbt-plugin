@@ -21,5 +21,5 @@ if (!window.SKP_CYL_PRODUCT_IDS) {
 
     <?php
 }
-add_action('woocommerce_cart_collaterals', 'render_fbt_widget_cart_page_simple');
+add_action('woocommerce_after_cart_table', 'render_fbt_widget_cart_page_simple');
 

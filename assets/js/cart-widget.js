@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
        ? `<span class="regular"><s>₹${p.regular_price}</s></span>
           <span class="sale">₹${p.sale_price}</span>`
        : `<span class="regular">₹${p.regular_price}</span>`}
-</div>
+        </div>
 
                     </div>
                 `).join("")}

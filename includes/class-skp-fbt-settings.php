@@ -182,9 +182,52 @@ function skp_fbt_last_run_cb() {
 }
 
 function skp_fbt_rebuild_now_cb() {
-    echo '<button type="button" class="button button-secondary" id="skp-fbt-rebuild">Rebuild Now</button>';
+    echo '<button type="button" class="button button-secondary" id="skp-fbt-rebuild_now">Rebuild Now</button>';
     echo '<p class="description">Runs batch immediately (via AJAX)</p>';
 }
+
+
+add_action('admin_enqueue_scripts', 'skp_fbt_admin_scripts');
+function skp_fbt_admin_scripts($hook) {
+    // only load on our settings page (top-level menu slug = skp-fbt-settings)
+    if ($hook !== 'toplevel_page_skp-fbt-settings') return;
+
+    wp_enqueue_script(
+        'skp-fbt-admin-js',
+          plugin_dir_url(__DIR__) . 'assets/js/skp-fbt-admin.js',
+        array(),
+        time(),
+        true
+    );
+
+    wp_localize_script('skp-fbt-admin-js', 'SKP_FBT_ADMIN', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('skp_fbt_rebuild_nonce'),
+    ));
+}
+
+add_action('wp_ajax_skp_fbt_rebuild', 'skp_fbt_rebuild_handler');
+function skp_fbt_rebuild_handler() {
+    check_ajax_referer('skp_fbt_rebuild_nonce', 'nonce');
+
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    // Docker container run command
+    $cmd = 'docker run --rm skp-fbt-batch:latest'; // image name jo tumne banaya
+    exec($cmd, $output, $return_var);
+
+    if ($return_var === 0) {
+        wp_send_json_success('Docker container started successfully!');
+    } else {
+        wp_send_json_error('Failed to start Docker container!');
+    }
+}
+
+
+
+
 
 // 4️⃣ Settings page HTML
 function skp_fbt_settings_page()

@@ -112,7 +112,7 @@ public function save_item_item_recommendations( $request ) {
             $table,
             [
                 'score'      => $score,
-                'updated_at' => current_time('mysql')
+                'updated_at' => current_time('mysql',0)
             ],
             [
                 'product_id' => $product_id,
@@ -129,7 +129,7 @@ public function save_item_item_recommendations( $request ) {
                 'product_id' => $product_id,
                 'rec_id'     => $rec_id,
                 'score'      => $score,
-                'updated_at' => current_time('mysql')
+                'updated_at' => current_time('mysql',0)
             ],
             [ '%d', '%d', '%f', '%s' ]
         );
