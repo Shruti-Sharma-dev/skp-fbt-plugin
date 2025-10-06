@@ -92,37 +92,22 @@ public function save_item_item_recommendations( $request ) {
     $table = $wpdb->prefix . 'skp_fbt_item_item';
 
     $product_id = intval( $request['product_id'] );
-    $rec_id     = intval( $request['rec_id'] );
-    $score      = floatval( $request['score'] );
+    $recommendations = $request['recommendations'] ?? [];
 
-
-    if ( ! $product_id || ! $rec_id ) {
-        return new WP_Error('invalid_data', 'Product ID and rec_id required', ['status' => 400]);
+    if ( ! $product_id || empty($recommendations) ) {
+        return new WP_Error('invalid_data', 'Product ID and recommendations are required', ['status' => 400]);
     }
 
+    // 1️⃣ Delete existing recommendations for this product
+    $wpdb->delete( $table, ['product_id' => $product_id], ['%d'] );
 
-    $exists = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $table WHERE product_id = %d AND rec_id = %d",
-        $product_id, $rec_id
-    ));
+    // 2️⃣ Insert new recommendations
+    foreach ($recommendations as $rec) {
+        $rec_id = intval($rec['rec_id']);
+        $score = floatval($rec['score']);
 
-    if ($exists) {
-        // Update existing row
-        $wpdb->update(
-            $table,
-            [
-                'score'      => $score,
-                'updated_at' => current_time('mysql',0)
-            ],
-            [
-                'product_id' => $product_id,
-                'rec_id'     => $rec_id
-            ],
-            [ '%f', '%s' ],
-            [ '%d', '%d' ]
-        );
-    } else {
-        // Insert new row
+        if (!$rec_id) continue;
+
         $wpdb->insert(
             $table,
             [
@@ -131,15 +116,14 @@ public function save_item_item_recommendations( $request ) {
                 'score'      => $score,
                 'updated_at' => current_time('mysql',0)
             ],
-            [ '%d', '%d', '%f', '%s' ]
+            ['%d','%d','%f','%s']
         );
     }
 
     return [
-        'success'    => true,
-        'product_id' => $product_id,
-        'rec_id'     => $rec_id,
-        'score'      => $score
+        'success'       => true,
+        'product_id'    => $product_id,
+        'recommendations_count' => count($recommendations)
     ];
 }
 

@@ -5,7 +5,12 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log("Detected product ID:", productId);
 
   if (!productId) return;
-
+  
+  recs_available = false;
+  div = document.getElementById("fbt-products");
+  if (div) {
+    div.style.display = "block";
+  }
   // Step 1: Get recommended IDs
   fetch(
     `https://srikrishnanew-staging.us23.cdn-alpha.com/wp-json/skp-fbt/v1/for-product/${productId}`
